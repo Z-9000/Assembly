@@ -3,4 +3,4 @@
 ASMTute1/
 
 # ...EXCEPT for your actual assembly source files!
-!**/Linux/*.s
+!**/Linux/ASM_Mxy*.s
