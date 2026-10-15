@@ -3,55 +3,43 @@
 .text
 _start:
 
-lea r15, [callstack]
-lea rsp, [callstack]
-lea rax, [return]
-mov [r15], rax
-add r15, 8
+mov r12, 5
 
-jmp print_hello
-
-return:
+if_else:
+  cmp r12, 5
+  je loop1
   jmp exit
 
-exit:
-  mov rax, 60 ;# system call code for exit
-  xor rdi, rdi ;# zero out rdi
-  syscall ;# execute system call
+mov r12, 3; # when i used r11 then it kept printing hello again and again instead of stopping - this was beacuse sys_write system call clobbers (overwrites) r11, in 64-bit linux, the kernel uses specific registers for system calls so when i ran the syscall tehn cpu automatically overwrtoe rcx and r11 with internal values
 
-print_hello:
-  mov rax, 1 ;# write
-  mov rdi, 1 ;# to terminal
-  lea rsi, s1 ;# start of the string
-  lea rdx, s1_len ;# length of string
-  syscall ;# execute / call kernel
-  
-  lea rax, [return_hello]
-  mov [r15], rax
-  add r15, 8
-  jmp print_world
-  return_hello:
-    sub r15, 8
-    mov rax, [r15]
-    jmp rax
-  
+loop1:
+  cmp r12, 9
+  je loop2
+  call print
+  inc r12
+  jmp loop1 
 
-print_world:
+loop2: ; # compound conditional
+  cmp r12, 6 
+  jle exit
+  cmp r12, 13
+  jge exit
+  inc r12
+  jmp loop2
+
+print:
   mov rax, 1
   mov rdi, 1
-  lea rsi, s2
-  lea rdx, s2_len
+  lea rsi, [s1]
+  lea rdx, [s1len]
   syscall
-  sub r15, 8
-  mov rax, [r15]
-  jmp rax
+  ret
 
-
+exit: 
+  mov rax, 60
+  xor rdi, rdi
+  syscall
+  
 .data
-
-callstack: .skip 4096
-
-s1: .ascii "hello "
-s1_len = . - s1
-s2: .ascii "world!\n"
-s2_len = . - s2
+s1: .ascii "Hello\n" 
+s1len = . - s1
